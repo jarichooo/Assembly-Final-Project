@@ -195,10 +195,6 @@ print_entered_nums:
     dec ebx
     jnz print_entered_nums
 
-    push newline
-    call _printf
-    add esp, 4
-
     jmp sort_asc
 
 ; SORT ASCENDING
@@ -237,10 +233,6 @@ print_asc:
     add esi, 4
     dec ebx
     jnz print_asc
-
-    push newline
-    call _printf
-    add esp, 4
 
     jmp sort_desc
 
