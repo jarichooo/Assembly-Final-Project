@@ -6,50 +6,52 @@ section .data
                   "[0] Exit", 0
 
     ; Choice Display and Integer Format Variable
-    option db "Enter choice: ", 0
-    int_format db "%d", 0
-    str_format db "%s", 0
+    option      db "Enter choice: ", 0
+    int_format  db "%d", 0
+    str_format  db "%s", 0
     char_format db "%c", 0             
 
     ; Return to Menu Display Variable
-    ret_menu db 10, "Returning to main menu...", 10, 0
+    ret_menu    db 10, "Returning to main menu...", 10, 0
 
     ; Five Numbers Variables
     num_display db "Enter integer #%d: ", 0
     num_entered db 10, "Numbers entered: ", 0
-    num_asc db 10, "Ascending: ", 0
-    num_desc db 10, "Descending: ", 0
-    int_out db "%d ", 0
+    num_asc     db 10, "Ascending: ", 0
+    num_desc    db 10, "Descending: ", 0
+    int_out     db "%d ", 0
 
     ; Five Words Variables
-    word_prompt db "Enter word #%d: ", 0
-    conv_words_msg db 10, "Converted words:", 10, 0
-    word_conv_fmt db "%s  -> %s", 10, 0
-    word_asc_msg db 10, "Sorted ascending:", 10, 0
-    word_desc_msg db 10, "Sorted descending:", 10, 0
-    word_fmt db "%s", 10, 0
-    err_letters db "ERROR: Words may only contain letters. Please re-enter.", 10, 0
-    err_spaces db "ERROR: Words cannot contain spaces. Please re-enter.", 10, 0
+    word_prompt     db "Enter word #%d: ", 0
+    conv_words_msg  db 10, "Converted words:", 10, 0
+    word_asc        db 10, "Sorted ascending:", 10, 0
+    word_desc       db 10, "Sorted descending:", 10, 0
+    word_conv_fmt   db "%s  -> %s", 10, 0
+    word_format     db "%s", 10, 0
 
     ; Error Display Variables
-    err_menu db "ERROR: Invalid menu choice. Please try again.", 10, 0
-    err_integer db "ERROR: Input is not a valid integer. Please re-enter.", 10, 0
-    err_posi_integer db "ERROR: Only positive integers are allowed. Please re-enter.", 10, 0
-    quit db "Program terminated.", 10, 0
-    newline db 10, 0
+    err_menu            db "ERROR: Invalid menu choice. Please try again.", 10, 0
+    err_integer         db "ERROR: Input is not a valid integer. Please re-enter.", 10, 0
+    err_posi_integer    db "ERROR: Only positive integers are allowed. Please re-enter.", 10, 0
+
+    err_letters         db "ERROR: Words may only contain letters. Please re-enter.", 10, 0
+    err_spaces          db "ERROR: Words cannot contain spaces. Please re-enter.", 10, 0
+    
+    quit        db "Program terminated.", 10, 0
+    newline     db 10, 0
 
 section .bss
     ; Buffer Variables
-    input_choice resd 1
-    num_input resd 1
-    nums resd 5
-    inbuf resb 64
-    count resd 1
+    input_choice    resd 1
+    num_input       resd 1
+    nums            resd 5
+    inbuf           resb 64
+    count           resd 1
     
     ; Five Words Variables
-    word_input resb 32
-    words resb 160         ; Space for 5 words, 32 bytes each
-    conv_words resb 160    ; Space for 5 converted words
+    word_input      resb 32
+    words           resb 160    ; Space for 5 words, 32 bytes each
+    conv_words      resb 160    ; Space for 5 converted words
 
 section .text
     global _main
@@ -118,18 +120,27 @@ exit_program:
     mov eax, 0 
     ret
 
-; FIVE NUMBERS FUNCTION
+;-----------------------------------------------------------
+; five_numbers
+;   Handles input of 5 positive integers and performs sorting
+;   - Displays numbers in original order
+;   - Displays numbers sorted ascending
+;   - Displays numbers sorted descending
+; Notes:
+;   - Only accepts positive integers
+;   - Uses bubble sort for sorting operations
+;   - Validates input for positive integers
+;   - Handles invalid input
+;-----------------------------------------------------------
 five_numbers:
-    ; Make sure the Array is Cleaned to Prevent Leftover Garbage
-    mov ecx, 5
-    lea esi, [nums]
+    ; Initialize array to zero to prevent garbage values
+    mov ecx, 5             ; Counter for array size
+    lea esi, [nums]        ; Load effective address of nums array
 zero_loop:
-    ; Set current element to 0
-    mov dword [esi], 0
-    add esi, 4
-    dec ecx
-    ; Repeat til ecx == 0
-    jnz zero_loop
+    mov dword [esi], 0     ; Set current element to 0
+    add esi, 4             ; Move to next integer (4 bytes)
+    dec ecx                ; Decrement counter
+    jnz zero_loop          ; Continue until all elements are zero
 
     ; Set count to 0
     mov dword [count], 0
@@ -284,9 +295,20 @@ print_desc:
 
     jmp return_to_menu
 
-; FIVE WORDS FUNCTION
+;-----------------------------------------------------------
+; five_words
+;   Handles input and processing of 5 words with vowel conversion
+;   - Displays original and converted words (vowels to numbers)
+;   - Shows words sorted in ascending order
+;   - Shows words sorted in descending order
+; Notes:
+;   - Only accepts alphabetic characters (A-Z, a-z)
+;   - Converts vowels to numbers (a/A=1, e/E=2, i/I=3, o/O=4, u/U=5)
+;   - Rejects words with spaces or non-letter characters
+;   - Case-insensitive sorting after conversion
+;-----------------------------------------------------------
 five_words:
-    ; Reset counter
+    ; Reset counter for word input
     mov dword [count], 0
 
 read_word_loop:
@@ -518,7 +540,7 @@ convert_display_loop:
     jnz convert_display_loop
 
     ; Sort and display ascending
-    push word_asc_msg
+    push word_asc
     call _printf
     add esp, 4
     
@@ -526,7 +548,7 @@ convert_display_loop:
     call display_sorted_words
 
     ; Sort and display descending
-    push word_desc_msg
+    push word_desc
     call _printf
     add esp, 4
     
@@ -754,7 +776,7 @@ display_loop:
     push ecx
     
     push esi
-    push word_fmt
+    push word_format
     call _printf
     add esp, 8
     
