@@ -77,7 +77,7 @@ _main:
     jmp main_menu_loop
 
 ; =============================================================================
-; MAIN MENU - Now 100% safe from invalid input
+; MAIN MENU 
 ; =============================================================================
 main_menu_loop:
     push main_menu
@@ -117,7 +117,7 @@ main_menu_loop:
     jmp main_menu_loop
 
 ; =============================================================================
-; ADD MENU - Safe input
+; ADD MENU 
 ; =============================================================================
 menu_add:
     push submenu_add
@@ -192,7 +192,7 @@ add_full:
     jmp menu_add
 
 ; =============================================================================
-; DELETE MENU - Now completely safe
+; DELETE MENU 
 ; =============================================================================
 menu_delete:
     push submenu_delete
@@ -316,7 +316,7 @@ delete_by_owner_once:
     jmp menu_delete
 
 ; =============================================================================
-; SEARCH MENU - Safe + returns to search menu on not found
+; SEARCH MENU 
 ; =============================================================================
 menu_search:
     push submenu_search
@@ -441,7 +441,7 @@ search_by_owner_once:
     jmp menu_search
 
 ; =============================================================================
-; DISPLAY MENU - Safe input
+; DISPLAY MENU 
 ; =============================================================================
 menu_display:
     push submenu_display
