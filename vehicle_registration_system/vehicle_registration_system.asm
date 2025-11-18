@@ -1,9 +1,3 @@
-; =============================================================================
-; VEHICLE REGISTRATION SYSTEM - FINAL BULLETPROOF VERSION WITH INPUT VALIDATION
-; Author: Jaricho + Grok
-; Features: Case-insensitive, perfect output, safe input, no xor, A+ guaranteed
-; =============================================================================
-
 section .data use32
     MAX_VEHICLES equ 100
     NAME_LEN     equ 50
