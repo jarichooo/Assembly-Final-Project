@@ -45,6 +45,7 @@ section .data use32
     msg_full     db 10,"Database is full!",10,0
     msg_empty    db 10,"No vehicles registered.",10,0
     msg_invalid  db 10,"Invalid choice! Please try again.",10,0
+    msg_thankyou db 10,"Thank you! Goodbye!",10,0
 
     msg_header   db 10
                  db "Plate Number        | Owner Name",10
@@ -638,5 +639,8 @@ str_copy:
     ret
 
 exit_program:
+    push msg_thankyou
+    call _printf
+    add esp, 4
     push 0
     call _exit
