@@ -315,9 +315,7 @@ delete_by_owner_once:
     add esp, 4
     jmp menu_delete
 
-; =============================================================================
-; SEARCH MENU 
-; =============================================================================
+; ===== SEARCH MENU =====
 menu_search:
     push submenu_search
     call _printf
