@@ -438,9 +438,7 @@ search_by_owner_once:
     add esp, 4
     jmp menu_search
 
-; =============================================================================
-; DISPLAY MENU 
-; =============================================================================
+; ===== DISPLAY MENU =====
 menu_display:
     push submenu_display
     call _printf
