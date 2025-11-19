@@ -77,6 +77,7 @@ section .text use32
     extern _getchar
     extern _exit
 
+; ===== MAIN ENTRY =====
 _main:
     mov dword [count], 0
     jmp main_menu_loop
