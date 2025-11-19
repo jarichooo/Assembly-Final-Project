@@ -1,9 +1,12 @@
 section .data use32
+; ===== DATA SECTION =====
     MAX_VEHICLES equ 100
     NAME_LEN     equ 50
     PLATE_LEN    equ 15
     REC_SIZE     equ (PLATE_LEN + NAME_LEN + 1)
 
+; Menu text strings for printing
+; Input prompts and status messages
     main_menu db 10
               db "MENU:",10
               db "[1] Add",10
