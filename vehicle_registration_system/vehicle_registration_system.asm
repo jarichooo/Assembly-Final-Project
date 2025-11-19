@@ -544,9 +544,7 @@ no_vehicles:
     add esp, 4
     jmp menu_display
 
-; =============================================================================
-; HELPER FUNCTIONS
-; =============================================================================
+; ===== HELPER FUNCTIONS =====
 get_vehicle_ptr:
     mov eax, [temp_index]
     imul eax, REC_SIZE
