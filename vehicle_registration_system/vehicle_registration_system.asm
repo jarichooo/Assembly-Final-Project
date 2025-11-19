@@ -61,6 +61,7 @@ section .data use32
     newline      db 10,0
 
 section .bss use32
+; ===== BSS SECTION =====
     vehicles     resb MAX_VEHICLES * REC_SIZE
     input_buf    resb 100
     choice       resd 1
