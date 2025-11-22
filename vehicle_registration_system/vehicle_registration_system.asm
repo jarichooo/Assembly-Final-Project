@@ -1,4 +1,4 @@
-section .data use32
+section .data
 ; ===== DATA SECTION =====
 ; Constants defining sizes for storage
     MAX_VEHICLES equ 100             ; Maximum number of vehicle records
@@ -66,7 +66,7 @@ section .data use32
     separator    db "| ",0
     newline      db 10,0
 
-section .bss use32
+section .bss
 ; ===== BSS SECTION =====
     vehicles     resb MAX_VEHICLES * REC_SIZE  ; Storage space for all vehicles
     input_buf    resb 100                      ; Input buffer for strings
@@ -76,7 +76,7 @@ section .bss use32
     found_count  resd 1                        ; Count matches in search/delete
     scanf_result resd 1                        ; Check if scanf successfully read a number
 
-section .text use32
+section .text
     global _main
     extern _printf, _scanf, _getchar, _exit
 
