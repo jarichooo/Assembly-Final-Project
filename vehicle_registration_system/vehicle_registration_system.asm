@@ -49,6 +49,7 @@ section .data use32
     msg_notfound db 10,"Not found!",10,0
     msg_full     db 10,"Database is full!",10,0
     msg_empty    db 10,"No vehicles registered.",10,0
+    msg_exists   db 10,"Plate number already exists!",10,0
     msg_invalid  db 10,"Invalid choice! Please try again.",10,0
     msg_thankyou db 10,"Thank you! Goodbye!",10,0
 
@@ -58,6 +59,7 @@ section .data use32
                  db "--------------------|-----------------------------",10,0
 
 ; Formatting strings for printf
+    fmt_name     db "%49[^\n]", 0
     fmt_int      db "%d",0
     fmt_str      db "%s",0
     plate_format db "%-20s",0
@@ -164,33 +166,71 @@ do_add_vehicle:
     push prompt_owner
     call _printf
     add esp, 4
-    push input_buf
-    push fmt_str
-    call _scanf
-    add esp, 8
-    call clear_input_buffer
+
+    call read_line                     ; Reads input without cutting any character
+
     lea edi, [edi + PLATE_LEN]         ; Move to owner field
     mov esi, input_buf
-    call str_copy                       ; Copy name to record
+    call str_copy                      ; Copy name to record
+    sub edi, PLATE_LEN                 ; Move back to start of record
 
 ; --- Read Plate Number ---
     push prompt_plate
     call _printf
     add esp, 4
-    push input_buf
-    push fmt_str
-    call _scanf
-    add esp, 8
-    call clear_input_buffer
-    sub edi, PLATE_LEN                 ; Move back to plate field
+
+    call read_line
+
+; --- Check for duplicates ---
+    push edi                           ; Save pointer to new record
+    mov dword [temp_index], 0
+
+.check_dup_loop:
+    mov eax, [temp_index]
+    cmp eax, [count]
+    jge .check_dup_done                ; No duplicates found, proceed
+
+; Get existing record
+    imul eax, REC_SIZE
+    lea esi, [vehicles + eax]
+    
+; Check if active
+    cmp byte [esi + PLATE_LEN + NAME_LEN], 0
+    je .check_next
+
+; Compare input_buf (new plate) vs [esi] (existing plate)
+    push edi                           ; Save EDI
+    mov edi, esi                       ; EDI = existing record plate
+    mov esi, input_buf                 ; ESI = new plate input
+    call str_cmp_ci
+    pop edi                            ; Restore EDI
+    
+    test eax, eax
+    jz .duplicate_found                ; If 0 (equal), duplicate found!
+
+.check_next:
+    inc dword [temp_index]
+    jmp .check_dup_loop
+
+.duplicate_found:
+    pop edi                            ; Clean stack
+    push msg_exists
+    call _printf
+    add esp, 4
+    jmp menu_add                       ; Cancel add, go back to menu
+
+.check_dup_done:
+    pop edi                            ; Restore pointer to new record
+
+; Copy plate to record (Since no duplicate was found)
     mov esi, input_buf
-    call str_copy                       ; Copy plate to record
+    call str_copy
 
 ; Mark record as active (1)
     add edi, PLATE_LEN + NAME_LEN
     mov byte [edi], 1
 
-    inc dword [count]                  ; Increase number of vehicles
+    inc dword [count]
 
     push msg_added
     call _printf
@@ -263,7 +303,7 @@ delete_by_plate_once:
 
     add edi, PLATE_LEN + NAME_LEN        ; Go to active flag
     cmp byte [edi], 0
-    je .next                              ; Skip inactive
+    je .next                             ; Skip inactive
     sub edi, PLATE_LEN + NAME_LEN        ; Back to start of record
 
 ; Compare plate (case insensitive)
@@ -302,11 +342,7 @@ delete_by_owner_once:
     call _printf
     add esp, 4
 
-    push input_buf
-    push fmt_str
-    call _scanf
-    add esp, 8
-    call clear_input_buffer
+    call read_line
 
     mov dword [found_count], 0
     mov dword [temp_index], 0
@@ -453,11 +489,7 @@ search_by_owner_once:
     call _printf
     add esp, 4
 
-    push input_buf
-    push fmt_str
-    call _scanf
-    add esp, 8
-    call clear_input_buffer
+    call read_line
 
     mov dword [found_count], 0
     mov dword [temp_index], 0
@@ -577,11 +609,7 @@ display_by_owner_once:
     call _printf
     add esp, 4
 
-    push input_buf
-    push fmt_str
-    call _scanf
-    add esp, 8
-    call clear_input_buffer
+    call read_line
 
     mov dword [found_count], 0
     mov dword [temp_index], 0
@@ -635,6 +663,35 @@ no_vehicles:
     jmp menu_display
 
 ; ===================== HELPER FUNCTIONS =====================
+; Reads all the input without cutting off any character.
+read_line:
+    push edi
+    push ebx                           ; Save EBX 
+    mov edi, input_buf
+    xor ebx, ebx                       ; Use EBX as counter
+
+.rl_loop:
+    call _getchar
+    cmp al, 10                         ; Check for Newline
+    je .rl_done
+    cmp al, 13                         ; Check for Carriage Return
+    je .rl_loop
+    cmp al, -1                         ; Check for EOF
+    je .rl_done
+
+    cmp ebx, 90                        ; Prevents buffer overflow
+    jge .rl_loop                       ; If full, keep reading to consume line, but don't store
+
+    mov [edi], al                      ; Store character
+    inc edi
+    inc ebx
+    jmp .rl_loop
+
+.rl_done:
+    mov byte [edi], 0                  ; Null-terminate the string
+    pop ebx                            ; Restore EBX
+    pop edi
+    ret
 
 ; Get pointer to vehicle record based on temp_index
 get_vehicle_ptr:
@@ -645,6 +702,7 @@ get_vehicle_ptr:
 
 ; Print plate and owner in formatted layout
 print_vehicle:
+    push edi  
     push edi
     push plate_format
     call _printf
@@ -653,6 +711,8 @@ print_vehicle:
     push separator
     call _printf
     add esp, 4
+
+    pop edi
 
 ; Print owner name
     add edi, PLATE_LEN
