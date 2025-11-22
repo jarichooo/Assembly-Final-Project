@@ -49,6 +49,7 @@ section .data
     msg_notfound db 10,"Not found!",10,0
     msg_full     db 10,"Database is full!",10,0
     msg_empty    db 10,"No vehicles registered.",10,0
+    msg_blank    db 10,"Input cannot be empty!",10,0
     msg_exists   db 10,"Plate number already exists!",10,0
     msg_invalid  db 10,"Invalid choice! Please try again.",10,0
     msg_thankyou db 10,"Thank you! Goodbye!",10,0
@@ -163,25 +164,50 @@ do_add_vehicle:
     lea edi, [vehicles + eax]
 
 ; --- Read Owner Name ---
+.retry_owner:
     push prompt_owner
     call _printf
     add esp, 4
 
     call read_line                     ; Reads input without cutting any character
 
+    cmp byte [input_buf], 0            ; Check if input is blank
+    je .owner_is_blank
+
     lea edi, [edi + PLATE_LEN]         ; Move to owner field
     mov esi, input_buf
     call str_copy                      ; Copy name to record
     sub edi, PLATE_LEN                 ; Move back to start of record
+    jmp .get_plate
+
+.owner_is_blank:
+    push msg_blank
+    call _printf
+    add esp, 4
+    jmp .retry_owner                   ; Ask again
 
 ; --- Read Plate Number ---
+.get_plate:
+.retry_plate:
     push prompt_plate
     call _printf
     add esp, 4
 
     call read_line
 
+    cmp byte [input_buf], 0            ; Check if input is blank
+    je .plate_is_blank
+
+    jmp .check_duplicates              ; Proceed to check logic
+
+.plate_is_blank:
+    push msg_blank
+    call _printf
+    add esp, 4
+    jmp .retry_plate                   ; Ask plate number input again
+
 ; --- Check for duplicates ---
+.check_duplicates:
     push edi                           ; Save pointer to new record
     mov dword [temp_index], 0
 
